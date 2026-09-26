@@ -1,0 +1,67 @@
+# ── Raw data (never commit large dataset files) ──────────────────────────────
+dataset/
+*.tsv
+*.csv
+
+# ── Output submission files ───────────────────────────────────────────────────
+output/*.tsv
+output/*.csv
+# Keep the directory itself
+!output/.gitkeep
+
+# ── Model checkpoints / weights ───────────────────────────────────────────────
+models/
+*.pkl
+*.joblib
+*.lgb
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.gguf
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── OS artifacts ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs / scratch ────────────────────────────────────────────────────────────
+*.log
+logs/
+scratch/
+
+# ── Submission zip ────────────────────────────────────────────────────────────
+*.zip
+
+# ── HuggingFace / sentence-transformers cache ─────────────────────────────────
+.cache/
+huggingface/
+sentence_transformers/
