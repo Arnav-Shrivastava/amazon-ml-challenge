@@ -18,7 +18,7 @@ import lightgbm as lgb
 import pandas as pd
 from tqdm import tqdm
 
-from blocking import generate_candidates
+from tfidf_blocking import build_tfidf_candidates
 from features import build_feature_matrix, FEATURE_COLS
 
 
@@ -40,11 +40,12 @@ def run_inference_pipeline(
     print(f"Loaded {len(s1_df):,} S1 entities.")
 
     # 2. Blocking
-    cands = generate_candidates(
-        source1_df=s1_df,
+    cands = build_tfidf_candidates(
+        s1_path=s1_path,
         s2_path=s2_path,
         s3_path=s3_path,
-        output_path=None,  # We don't need to save intermediate candidates for test
+        output_path=output_path.parent / "test_candidate_pairs.tsv",
+        top_k=30
     )
 
     n_cands = sum(len(v) for v in cands.values())
