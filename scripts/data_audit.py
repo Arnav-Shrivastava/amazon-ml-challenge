@@ -141,11 +141,16 @@ def scan_source(path: Path, label: str) -> dict:
 
 
 def scan_gt(path: Path) -> dict:
-    """Stream-scan ground truth TSV."""
+    """Stream-scan ground truth TSV.
+
+    GT rows with an empty 'matched_entity_ids' field are TRUE SINGLETONS.
+    We count them correctly here — do NOT confuse 'row in GT' with 'has a match'.
+    """
     print(f"  Scanning ground truth ({path.name}) ...")
-    row_count   = 0
+    row_count    = 0
     match_counts: list[int] = []
-    s1_ids_seen = set()
+    s1_ids_seen  = set()
+    singleton_ids: set[str] = set()  # S1 IDs with empty matched list
 
     for chunk in pd.read_csv(
         path, sep=SEP, dtype=str, keep_default_na=False,
@@ -154,16 +159,19 @@ def scan_gt(path: Path) -> dict:
         chunk.columns = [c.strip() for c in chunk.columns]
         row_count += len(chunk)
         for _, row in chunk.iterrows():
-            s1_id = row["source1_entity_id"]
+            s1_id   = row["source1_entity_id"]
             matched = row["matched_entity_ids"]
-            ids = [x.strip() for x in matched.split(",") if x.strip()]
+            ids     = [x.strip() for x in matched.split(",") if x.strip()]
             match_counts.append(len(ids))
             s1_ids_seen.add(s1_id)
+            if len(ids) == 0:
+                singleton_ids.add(s1_id)
 
     return {
-        "row_count": row_count,
-        "s1_ids_seen": s1_ids_seen,
-        "match_counts": match_counts,
+        "row_count":     row_count,
+        "s1_ids_seen":   s1_ids_seen,
+        "singleton_ids": singleton_ids,  # S1 IDs with empty matched_entity_ids
+        "match_counts":  match_counts,
     }
 
 
@@ -286,9 +294,14 @@ def run_audit() -> None:
     gt_s1_count = len(gt_stats["s1_ids_seen"])
     singleton_count = s1_total - gt_s1_count
 
-    print(f"\n  Total S1 entities        : {s1_total:,}")
-    print(f"  S1 with >= 1 match (GT)  : {gt_s1_count:,}  ({gt_s1_count/s1_total*100:.1f}%)")
-    print(f"  Singletons (no GT entry) : {singleton_count:,}  ({singleton_count/s1_total*100:.1f}%)")
+    print(f"\n  Total S1 entities              : {s1_total:,}")
+    true_singletons = len(gt_stats["singleton_ids"])
+    matched_count   = gt_s1_count - true_singletons
+    print(f"  S1 in GT with >= 1 match       : {matched_count:,}  ({matched_count/s1_total*100:.1f}%)")
+    print(f"  S1 in GT with 0 matches (singletons): {true_singletons:,}  ({true_singletons/s1_total*100:.1f}%)")
+    not_in_gt = s1_total - gt_s1_count
+    if not_in_gt:
+        print(f"  S1 NOT in GT at all            : {not_in_gt:,}  ({not_in_gt/s1_total*100:.1f}%)")
 
     mc = gt_stats["match_counts"]
     match_arr = np.array(mc, dtype=np.int32)
