@@ -100,7 +100,7 @@ _STRATEGIES: list[tuple[str, Callable]] = [
     ("B2_phonetic_soundex",  _keys_B2),
     ("B3_postal_code",       _keys_B3),
     # ("B4_city_token",        _keys_B4),  # Disabled: Causes memory explosion during join due to low cardinality
-    ("B5_country_prefix",    _keys_B5),
+    # ("B5_country_prefix",    _keys_B5),  # Disabled: Causes memory explosion on generic prefixes (e.g. 'comp', 'star')
     ("B6_house_number",      _keys_B6),
     ("B7_sparse_fallback",   _keys_B7),
     ("B8_script_key",        _keys_B8),
