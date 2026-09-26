@@ -108,6 +108,10 @@ def macro_f05(
 
 def _run_unit_tests() -> None:
     """Verify against the worked example in the problem statement."""
+    import sys, io
+    # Ensure stdout handles Unicode on Windows (cp1252 terminals reject subscripts)
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     tol = 0.001
 
     # Worked example: predicted [S2-00047, S2-00193, S3-00812]
@@ -124,32 +128,32 @@ def _run_unit_tests() -> None:
     assert math.isclose(score, expected, abs_tol=tol), (
         f"Worked example FAILED: got {score:.4f}, expected {expected:.4f}"
     )
-    print(f"  [PASS] Worked example: F₀.₅ = {score:.4f} (expected ≈ {expected})")
+    print(f"  [PASS] Worked example: F0.5 = {score:.4f} (expected ~{expected})")
 
     # Singleton — correct prediction (empty → empty)
     score_singleton_correct = f05_score(predicted=set(), ground_truth=set())
     assert score_singleton_correct == 1.0, "Singleton correct FAILED"
-    print(f"  [PASS] Singleton correct: F₀.₅ = {score_singleton_correct}")
+    print(f"  [PASS] Singleton correct: F0.5 = {score_singleton_correct}")
 
     # Singleton — wrong prediction (empty GT but predicted something)
     score_singleton_wrong = f05_score(predicted={"S2-00001"}, ground_truth=set())
     assert score_singleton_wrong == 0.0, "Singleton wrong FAILED"
-    print(f"  [PASS] Singleton wrong: F₀.₅ = {score_singleton_wrong}")
+    print(f"  [PASS] Singleton wrong: F0.5 = {score_singleton_wrong}")
 
     # Perfect match
     score_perfect = f05_score(predicted={"S2-00001", "S3-00002"}, ground_truth={"S2-00001", "S3-00002"})
     assert score_perfect == 1.0, "Perfect match FAILED"
-    print(f"  [PASS] Perfect match: F₀.₅ = {score_perfect}")
+    print(f"  [PASS] Perfect match: F0.5 = {score_perfect}")
 
     # No overlap (all wrong)
     score_none = f05_score(predicted={"S2-99999"}, ground_truth={"S2-00001"})
     assert score_none == 0.0, "No overlap FAILED"
-    print(f"  [PASS] No overlap: F₀.₅ = {score_none}")
+    print(f"  [PASS] No overlap: F0.5 = {score_none}")
 
     # Missed all (false negatives only)
     score_missed = f05_score(predicted=set(), ground_truth={"S2-00001"})
     assert score_missed == 0.0, "Missed all FAILED"
-    print(f"  [PASS] Missed all (FN only): F₀.₅ = {score_missed}")
+    print(f"  [PASS] Missed all (FN only): F0.5 = {score_missed}")
 
     print("\n  All unit tests PASSED.")
 
